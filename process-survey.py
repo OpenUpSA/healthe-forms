@@ -29,11 +29,13 @@ def decorate(rows):
         r['facility_details/province'] += ' - ' + PROVINCES[r['facility_details/province']]
         r['facility_details/district'] += ' - ' + DISTRICTS[r['facility_details/district']]
 
+        r['date'] = r['end'].split('T', 2)[0]
+
 
 def generate_report(rows):
     decorate(rows)
 
-    fields = ['end', 'facility_details/province', 'facility_details/district', 'facility_details/facility',
+    fields = ['date', 'facility_details/province', 'facility_details/district', 'facility_details/facility',
               'facility_details/contact', 'basics/_gps_latitude', 'basics/_gps_longitude', 'basics/monitor',
               'medicine', 'in_stock', 'no stock - not_used_phc', 'no stock - per_patient', 'no stock - depot_order',
               'no stock - per_patient_depot_order', 'date_ordered']
