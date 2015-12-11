@@ -1,5 +1,5 @@
-from facilities import clinics_by_province, province_codes, district_codes
-from medicines import MEDS
+from facilities import clinics_by_province
+from utils import MEDS, DISTRICT_CODES, PROVINCE_CODES
 
 
 def medicine_elements():
@@ -21,11 +21,11 @@ def facility_elements():
     rows = []
 
     for province in sorted(clinics_by_province.keys()):
-        prov = province_codes[province]
+        prov = PROVINCE_CODES[province]
         districts = clinics_by_province[province]
 
         for district in sorted(districts.keys()):
-            dist = district_codes[district]
+            dist = DISTRICT_CODES[district]
 
             for clinic in sorted(districts[district]):
                 rows.append(('facilities', clinic, clinic, prov, dist))
@@ -37,18 +37,18 @@ def facility_elements():
 
 def province_elements():
     rows = []
-    for province in sorted(province_codes.keys()):
-        rows.append(('provinces', province_codes[province], province))
+    for province in sorted(PROVINCE_CODES.keys()):
+        rows.append(('provinces', PROVINCE_CODES[province], province))
     return rows
 
 
 def district_elements():
     rows = []
-    for province in sorted(province_codes.keys()):
-        prov = province_codes[province]
+    for province in sorted(PROVINCE_CODES.keys()):
+        prov = PROVINCE_CODES[province]
 
         for district in sorted(clinics_by_province[province].keys()):
-            rows.append(('districts', district_codes[district], district, prov))
+            rows.append(('districts', DISTRICT_CODES[district], district, prov))
     return rows
 
 
