@@ -7,7 +7,11 @@ from xlsxwriter.workbook import Workbook
 
 from utils import MEDS, PROVINCES, DISTRICTS
 
-REPORT_LABELS = ['Date', 'Province', 'District', 'Clinic Name', 'Clinic Contact', 'Latitute', 'Longitude', 'Monitor Name', 'Medicine Name', 'In Stock?', 'No Stock - Not used at PHC', 'No Stock - Ordered per Patient', 'No Stock - Ordered at Depot', 'No Stock - Ordered per patient, ordered at Depot', 'No Stock - Order Date', 'No Stock - Depot out of Stock']
+HEADINGS_WHITE = ['Date', 'Province', 'District', 'Clinic Name', 'Clinic Contact', 'Latitute', 'Longitude', 'Monitor Name', 'Medicine Name',]
+HEADINGS_GREEN = ['In Stock?', ]
+HEADINGS_BLUE = ['No Stock - Not used at PHC', 'No Stock - Ordered per Patient', 'No Stock - Ordered at Depot', 'No Stock - Ordered per patient, ordered at Depot', ]
+HEADINGS_ORANGE = ['No Stock - Order Date', 'No Stock - Depot out of Stock']
+
 
 def write_rows(fname, rows, fields=None):
     print "Writing %s" % fname
@@ -109,12 +113,41 @@ def write_xlsx(fname, period_rows, report_rows, report_fields):
     common = workbook.add_format({
         'font_name': 'Arial',
     })
+    heading_green = workbook.add_format({
+        'bold': True,
+        'bottom': 1,
+        'text_wrap': True,
+        'font_name': 'Arial',
+        'bg_color': 'b6d7a8',
+    })
+    heading_blue = workbook.add_format({
+        'bold': True,
+        'bottom': 1,
+        'text_wrap': True,
+        'font_name': 'Arial',
+        'bg_color': '9fc5e8',
+    })
+    heading_orange = workbook.add_format({
+        'bold': True,
+        'bottom': 1,
+        'text_wrap': True,
+        'font_name': 'Arial',
+        'bg_color': 'f9cb9c',
+    })
+
     report_sheet = workbook.add_worksheet('Report')
     data_sheet = workbook.add_worksheet('Data')
 
     # Column headings
-    for c, label in enumerate(REPORT_LABELS):
+    for c, label in enumerate(HEADINGS_WHITE):
         report_sheet.write(0, c, label, heading)
+    for c, label in enumerate(HEADINGS_GREEN):
+        report_sheet.write(len(HEADINGS_WHITE), c, label, heading)
+    for c, label in enumerate(HEADINGS_BLUE):
+        report_sheet.write(c, c, label, heading)
+    for c, label in enumerate(HEADINGS_ORANGE):
+        report_sheet.write(c, c, label, heading)
+    # adjust widths and height
     report_sheet.set_row(0, 65)
     report_sheet.set_column('A:B', 13)
     report_sheet.set_column('C:D', 25)
