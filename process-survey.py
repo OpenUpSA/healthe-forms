@@ -99,19 +99,23 @@ def write_xlsx(fname, period_rows, report_rows, report_fields):
         'bottom': 1,
         'text_wrap': True,
         'font_name': 'Arial',
+        'font_size': 10,
     })
     count = workbook.add_format({
         'bold': True,
         'top': 1,
         'font_name': 'Arial',
+        'font_size': 10,
     })
     percent = workbook.add_format({
         'bold': True,
         'num_format': '0%',
         'font_name': 'Arial',
+        'font_size': 10,
     })
     common = workbook.add_format({
         'font_name': 'Arial',
+        'font_size': 10,
     })
     heading_green = workbook.add_format({
         'bold': True,
@@ -119,6 +123,7 @@ def write_xlsx(fname, period_rows, report_rows, report_fields):
         'text_wrap': True,
         'font_name': 'Arial',
         'bg_color': 'b6d7a8',
+        'font_size': 10,
     })
     heading_blue = workbook.add_format({
         'bold': True,
@@ -126,6 +131,7 @@ def write_xlsx(fname, period_rows, report_rows, report_fields):
         'text_wrap': True,
         'font_name': 'Arial',
         'bg_color': '9fc5e8',
+        'font_size': 10,
     })
     heading_orange = workbook.add_format({
         'bold': True,
@@ -133,27 +139,37 @@ def write_xlsx(fname, period_rows, report_rows, report_fields):
         'text_wrap': True,
         'font_name': 'Arial',
         'bg_color': 'f9cb9c',
+        'font_size': 10,
     })
 
     report_sheet = workbook.add_worksheet('Report')
     data_sheet = workbook.add_worksheet('Data')
 
     # Column headings
+    offset = 0
     for c, label in enumerate(HEADINGS_WHITE):
-        report_sheet.write(0, c, label, heading)
+        report_sheet.write(0, offset + c, label, heading)
+    offset += len(HEADINGS_WHITE)
     for c, label in enumerate(HEADINGS_GREEN):
-        report_sheet.write(len(HEADINGS_WHITE), c, label, heading)
+        report_sheet.write(0, offset + c, label, heading_green)
+    offset += len(HEADINGS_GREEN)
     for c, label in enumerate(HEADINGS_BLUE):
-        report_sheet.write(c, c, label, heading)
+        report_sheet.write(0, offset + c, label, heading_blue)
+    offset += len(HEADINGS_BLUE)
     for c, label in enumerate(HEADINGS_ORANGE):
-        report_sheet.write(c, c, label, heading)
+        report_sheet.write(0, offset + c, label, heading_orange)
     # adjust widths and height
     report_sheet.set_row(0, 65)
     report_sheet.set_column('A:B', 13)
     report_sheet.set_column('C:D', 25)
-    report_sheet.set_column('E:H', 11)
-    report_sheet.set_column('I:I', 50)
+    report_sheet.set_column('E:E', 20)
+    report_sheet.set_column('F:G', 11)
+    report_sheet.set_column('H:H', 20)
+    report_sheet.set_column('I:I', 80)
     report_sheet.set_column('J:P', 15)
+
+    # Freeze first row
+    report_sheet.freeze_panes(1, 0)
 
     # Worsheet data
     for r, row in enumerate(report_rows, 1):
