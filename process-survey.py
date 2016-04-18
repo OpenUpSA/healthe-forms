@@ -3,8 +3,14 @@ import sys
 from copy import copy
 import os.path
 import arrow
+from xlsxwriter.workbook import Workbook
 
 from utils import MEDS, PROVINCES, DISTRICTS
+
+HEADINGS_WHITE = ['Date', 'Province', 'District', 'Clinic Name', 'Clinic Contact', 'Latitute', 'Longitude', 'Monitor Name', 'Medicine Name',]
+HEADINGS_GREEN = ['In Stock?', ]
+HEADINGS_BLUE = ['No Stock - Not used at PHC', 'No Stock - Ordered per Patient', 'No Stock - Ordered at Depot', 'No Stock - Ordered per patient, ordered at Depot', ]
+HEADINGS_ORANGE = ['No Stock - Order Date', 'No Stock - Depot out of Stock']
 
 
 def write_rows(fname, rows, fields=None):
@@ -83,17 +89,135 @@ def process_survey(fname, start_date):
     return rows
 
 
+def write_xlsx(fname, period_rows, report_rows, report_fields):
+    """
+    See http://stackoverflow.com/questions/32205927/xlsxwriter-and-libreoffice-not-showing-formulas-result
+    """
+    workbook = Workbook(fname)
+    heading = workbook.add_format({
+        'bold': True,
+        'bottom': 1,
+        'text_wrap': True,
+        'font_name': 'Arial',
+        'font_size': 10,
+    })
+    count = workbook.add_format({
+        'bold': True,
+        'top': 1,
+        'font_name': 'Arial',
+        'font_size': 10,
+    })
+    percent = workbook.add_format({
+        'bold': True,
+        'num_format': '0%',
+        'font_name': 'Arial',
+        'font_size': 10,
+    })
+    common = workbook.add_format({
+        'font_name': 'Arial',
+        'font_size': 10,
+    })
+    heading_green = workbook.add_format({
+        'bold': True,
+        'bottom': 1,
+        'text_wrap': True,
+        'font_name': 'Arial',
+        'bg_color': 'b6d7a8',
+        'font_size': 10,
+    })
+    heading_blue = workbook.add_format({
+        'bold': True,
+        'bottom': 1,
+        'text_wrap': True,
+        'font_name': 'Arial',
+        'bg_color': '9fc5e8',
+        'font_size': 10,
+    })
+    heading_orange = workbook.add_format({
+        'bold': True,
+        'bottom': 1,
+        'text_wrap': True,
+        'font_name': 'Arial',
+        'bg_color': 'f9cb9c',
+        'font_size': 10,
+    })
+
+    report_sheet = workbook.add_worksheet('Report')
+    data_sheet = workbook.add_worksheet('Data')
+
+    # Column headings
+    offset = 0
+    for c, label in enumerate(HEADINGS_WHITE):
+        report_sheet.write(0, offset + c, label, heading)
+    offset += len(HEADINGS_WHITE)
+    for c, label in enumerate(HEADINGS_GREEN):
+        report_sheet.write(0, offset + c, label, heading_green)
+    offset += len(HEADINGS_GREEN)
+    for c, label in enumerate(HEADINGS_BLUE):
+        report_sheet.write(0, offset + c, label, heading_blue)
+    offset += len(HEADINGS_BLUE)
+    for c, label in enumerate(HEADINGS_ORANGE):
+        report_sheet.write(0, offset + c, label, heading_orange)
+    # adjust widths and height
+    report_sheet.set_row(0, 65)
+    report_sheet.set_column('A:B', 13)
+    report_sheet.set_column('C:D', 25)
+    report_sheet.set_column('E:E', 20)
+    report_sheet.set_column('F:G', 11)
+    report_sheet.set_column('H:H', 20)
+    report_sheet.set_column('I:I', 80)
+    report_sheet.set_column('J:P', 15)
+
+    # Freeze first row
+    report_sheet.freeze_panes(1, 0)
+
+    # Worsheet data
+    for r, row in enumerate(report_rows, 1):
+        for key, val in row.iteritems():
+            report_sheet.write(r, report_fields.index(key), val, common)
+    # Data copy
+    data_fields = sorted(set(k for r in period_rows for k in r.keys()))
+    for col, field_name in enumerate(data_fields):
+        data_sheet.write(0, col, field_name, common)
+    for r, row in enumerate(period_rows, 1):
+        for key, val in row.iteritems():
+            data_sheet.write(r, data_fields.index(key), val, common)
+
+    # Totals
+    total_row0 = len(report_rows) + 1
+    formula = '=COUNTA('+colalpha(8)+'2:'+colalpha(8)+str(len(report_rows))+')'
+    report_sheet.write_formula(total_row0, 8, formula, count)
+    for col in range(9, 14):
+        yes_count_cell(report_sheet, len(report_rows), total_row0, col, count)
+    yes_count_cell(report_sheet, len(report_rows), total_row0, 15, count)
+    formula = '='+colalpha(9)+str(total_row0+1)+'/'+colalpha(8)+str(total_row0+1)
+    report_sheet.write_formula(total_row0+1, 9, formula, percent)
+
+    workbook.close()
+
+
+def yes_count_cell(sheet, rows, row, col, cellformat):
+    formula = '=COUNTIF('+colalpha(col)+'2:'+colalpha(col)+str(rows)+', "=yes")'
+    sheet.write_formula(row, col, formula, cellformat)
+
+
+def colalpha(n):
+    return chr(n + ord('a'))
+
+
 def make_fname(fname, suffix):
     base, ext = os.path.splitext(fname)
     return ''.join([base, '-', suffix, ext])
 
 
 def do_everything(fname, start_date):
-    rows = process_survey(fname, arrow.get(start_date + 'T00:00:00+0200'))
-    write_rows(make_fname(fname, 'processed'), rows)
+    period_rows = process_survey(fname, arrow.get(start_date + 'T00:00:00+0200'))
+    write_rows(make_fname(fname, 'processed'), period_rows)
 
-    rows, fields = generate_report(rows)
-    write_rows(make_fname(fname, 'report'), rows, fields)
+    report_rows, fields = generate_report(period_rows)
+    write_rows(make_fname(fname, 'report'), report_rows, fields)
+
+    write_xlsx(make_fname(fname, 'report')+'.xlsx', period_rows, report_rows, fields)
 
 
 if __name__ == '__main__':
