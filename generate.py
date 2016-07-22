@@ -1,3 +1,5 @@
+import argparse
+
 from facilities import clinics_by_province
 from utils import MEDS, DISTRICT_CODES, PROVINCE_CODES
 
@@ -52,20 +54,26 @@ def district_elements():
     return rows
 
 
-#rows = medicine_elements()
-#print '\n'.join('"' + '","'.join(r) + '"' for r in rows)
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Generate Health-E ODK forms')
+    parser.add_argument('--medicines', dest='medicines', action='store_const', const=True, help='Print medicine form elements')
+    parser.add_argument('--provinces', dest='provinces', action='store_const', const=True, help='Print province form elements')
+    parser.add_argument('--districts', dest='districts', action='store_const', const=True, help='Print district form elements')
+    parser.add_argument('--facilities', dest='facilities', action='store_const', const=True, help='Print facilities form elements')
+    args = parser.parse_args()
 
-print "\n\n------\n\n"
+    if args.medicines:
+        rows = medicine_elements()
+        print '\n'.join('"' + '","'.join(r) + '"' for r in rows)
 
-rows = province_elements()
-#print '\n'.join('"' + '","'.join(r) + '"' for r in rows)
+    if args.provinces:
+        rows = province_elements()
+        print '\n'.join('"' + '","'.join(r) + '"' for r in rows)
 
-print "\n\n------\n\n"
+    if args.districts:
+        rows = district_elements()
+        print '\n'.join('"' + '","'.join(r) + '"' for r in rows)
 
-rows = district_elements()
-#print '\n'.join('"' + '","'.join(r) + '"' for r in rows)
-
-print "\n\n------\n\n"
-
-rows = facility_elements()
-print '\n'.join('"' + '","'.join(r) + '"' for r in rows)
+    if args.facilities:
+        rows = facility_elements()
+        print '\n'.join('"' + '","'.join(r) + '"' for r in rows)
