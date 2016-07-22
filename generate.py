@@ -9,12 +9,15 @@ def medicine_elements():
     count = len(MEDS)
 
     for i, med in enumerate(MEDS.items()):
+        # field order for KoboToolbox:
+        # type name label required choice_filter relevant hint
+
         code, name = med
-        rows.append((code, 'begin group', '%d/%d: %s' % (i + 1, count, name)))
-        rows.append(('%s-in_stock' % code, 'select_one yes_no', 'Is the medicine in stock?', '', 'yes'))
-        rows.append(('%s-stockout_reason' % code, 'select_one no_stock_detail', 'What are the details of the stockout?', '', 'yes', '', "${%s-in_stock} = 'no'" % code))
-        rows.append(('%s-date_ordered' % code, 'date', 'When was the medicine ordered?', '', 'yes', '', "${%s-stockout_reason} = 'depot_order' or ${%s-stockout_reason} = 'per_patient_depot_order'" % (code, code)))
-        rows.append(('', 'end group'))
+        rows.append(('begin group', code, '%d/%d: %s' % (i + 1, count, name)))
+        rows.append(('select_one yes_no', '%s-in_stock' % code, 'Is the medicine in stock?', 'yes'))
+        rows.append(('select_one no_stock_detail', '%s-stockout_reason' % code, 'What are the details of the stockout?', 'yes', '', "${%s-in_stock} = 'no'" % code))
+        rows.append(('date', '%s-date_ordered' % code, 'When was the medicine ordered?', 'yes', '', "${%s-stockout_reason} = 'depot_order' or ${%s-stockout_reason} = 'per_patient_depot_order'" % (code, code)))
+        rows.append(('end group', ))
 
     return rows
 

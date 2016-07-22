@@ -1,3 +1,5 @@
+from collections import OrderedDict
+
 MEDICINES = [
     ('Abacavir 20 mg/mL solution (240 mL)',),
     ('Adrenaline 1 mg/ml injection (1 mL ampoule)',),
@@ -34,7 +36,7 @@ def med_code(med):
     return name, code
 
 
-MEDS = {}
+MEDS = OrderedDict()
 for med in MEDICINES:
     name, code = med_code(med)
 
