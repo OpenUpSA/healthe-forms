@@ -93,6 +93,7 @@ def write_xlsx(fname, period_rows, report_rows, report_fields):
     """
     See http://stackoverflow.com/questions/32205927/xlsxwriter-and-libreoffice-not-showing-formulas-result
     """
+    print "Writing %s" % fname
     workbook = Workbook(fname)
     heading = workbook.add_format({
         'bold': True,
@@ -205,8 +206,9 @@ def colalpha(n):
     return chr(n + ord('a'))
 
 
-def make_fname(fname, suffix):
-    base, ext = os.path.splitext(fname)
+def make_fname(fname, suffix, ext=None):
+    base, current_ext = os.path.splitext(fname)
+    ext = ext or current_ext
     return ''.join([base, '-', suffix, ext])
 
 
@@ -217,7 +219,7 @@ def do_everything(fname, start_date):
     report_rows, fields = generate_report(period_rows)
     write_rows(make_fname(fname, 'report'), report_rows, fields)
 
-    write_xlsx(make_fname(fname, 'report')+'.xlsx', period_rows, report_rows, fields)
+    write_xlsx(make_fname(fname, 'report', '.xlsx'), period_rows, report_rows, fields)
 
 
 if __name__ == '__main__':
