@@ -12,7 +12,8 @@ Generates Health-E forms and post-processes collected data.
 We generate the forms mostly so that we can generate the corresponding lists automatically, since
 there are many health facilities and many medicines.
 
-    python generate.py
+    python generate.py --medicines
+    python generate.py --help
 
 # processing a survey
 
@@ -20,4 +21,3 @@ there are many health facilities and many medicines.
 * run `python process-survey.py CSV-FILE START-DATE`
 
 For more detail see https://docs.google.com/document/d/1D6baIDar7KotHe_qH1rbgd55xfxwBZz-5YQJ5BLtxhQ/edit
-
